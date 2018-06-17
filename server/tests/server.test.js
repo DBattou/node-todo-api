@@ -3,10 +3,13 @@ const request = require('supertest')
 
 const { app } = require('./../server');
 const { Todo } = require('./../models/todo');
+const { ObjectId } = require('mongodb')
 
 const todos = [{
+  _id: new ObjectId(),
   text: 'First test todo'
 }, {
+  _id: new ObjectId(),
   text: 'second test'
 }]
 
@@ -64,8 +67,8 @@ describe('GET /todos', () => {
       .get('/todos')
       .expect(200)
       .expect((res) => {
-        var [{ text: text1 }, { text: text2 }] = res.body.todos;
-        expect([{ text: text1 }, { text: text2 }]).toEqual(todos);
+        expect(res.body.todos[0].text).toEqual(todos[0].text);
+        expect(res.body.todos[1].text).toEqual(todos[1].text);
       })
       .end((err, res) => {
         if (err) {
@@ -78,4 +81,31 @@ describe('GET /todos', () => {
         }).catch((e) => done(e));
       });
   });
+});
+
+describe('GET /todos/:id', () => {
+  it('Should return todo doc', (done) => {
+    request(app)
+      .get(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(todos[0].text);
+      })
+      .end(done);
+  });
+
+  it('Should receive a 404', (done) => {
+    request(app)
+      .get(`/todos/${todos[0]._id.toHexString()}` + 'coucou')
+      .expect(404)
+      .end(done)
+  });
+
+  it('Should receive a empty todo', (done) => {
+    request(app)
+      .get(`/todos/${123}`)
+      .expect(404)
+      .end(done)
+  });
+
 });
