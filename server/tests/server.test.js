@@ -114,9 +114,6 @@ describe('GET /todos/:id', () => {
 describe('DELETE /todos/:id', () => {
   it('Should remove a todo', (done) => {
     var hexId = todos[1]._id.toHexString();
-    //console.log(typeof('todos[1]._id') === typeof(new ObjectId().toHexString()));
-
-
 
     request(app)
       .delete(`/todos/${hexId}`)
