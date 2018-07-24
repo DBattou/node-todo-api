@@ -6,6 +6,7 @@ const express = require('express');
 
 var { Todo } = require('./models/todo');
 var { User } = require('./models/user');
+var { authenticate } = require('./middleware/authenticate');
 
 var app = express();
 var port = process.env.PORT || 3000;
@@ -91,11 +92,6 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
-// Post /user
-// 1) instance of todo
-// 2) save
-// 3) if go well
-// use pick like patch request
 app.post('/users', (req, res) => {
   var body = _.pick(req.body, ['email', 'password']);
   var user = new User(body);
@@ -106,6 +102,11 @@ app.post('/users', (req, res) => {
     res.status(400).send(e);
   })
 });
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+});
+
 
 app.listen(port, () => {
   console.log(`App started on port ${port}`);
