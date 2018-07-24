@@ -91,6 +91,22 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
+// Post /user
+// 1) instance of todo
+// 2) save
+// 3) if go well
+// use pick like patch request
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+  user.generateAuthToken().then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});
+
 app.listen(port, () => {
   console.log(`App started on port ${port}`);
 });
