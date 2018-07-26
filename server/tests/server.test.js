@@ -200,18 +200,17 @@ describe('POST /users', () => {
       .send({ email, password })
       .expect(200)
       .expect((res) => {
-        expect(res.headers['x-auth']).toExist();
-        expect(res.body._id).toExist();
+        expect(res.headers['x-auth']).toBeTruthy();
+        expect(res.body._id).toBeTruthy();
         expect(res.body.email).toBe(email);
       })
       .end((err) => {
         if (err) {
-          return done();
+          return done(err);
         }
-
         User.findOne({ email }).then((user) => {
-          expect(user).toExist();
-          expect(user.password).toNotBe(password);
+          expect(user).toBeTruthy();
+          expect(user.password).not.toBe(password);
           done();
         });
       });
@@ -250,3 +249,46 @@ describe('POST /users', () => {
       .end(done)
   });
 });
+
+
+describe('POST /users/login', () => {
+  it('should login user and return auth token', (done) => {
+    var email = users[1].email;
+    var password = users[1].password;
+
+    request(app)
+      .post('/users/login')
+      .send({ email, password })
+      .expect(200)
+      .expect((res) => {
+        expect(res.headers['x-auth']).toBeTruthy();
+        expect(res.body._id).toBeTruthy();
+        expect(res.body.email).toBe(email);
+      })
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(users[1]._id).then((user) => {
+          expect(user.tokens[0]).toMatchObject({
+            access: 'auth',
+            token: res.headers['x-auth']
+          });
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+
+
+  it('should return an error if password is incorrect', (done) => {
+    var email = users[0].email;
+    var wrongPassword = users[0].password + '!';
+
+    request(app)
+      .post('/users/login')
+      .send({ email, wrongPassword })
+      .expect(400)
+      .end(done)
+  });
+})
