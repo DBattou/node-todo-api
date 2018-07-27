@@ -7,12 +7,13 @@ var authenticate = (req, res, next) => {
     if (!user) {
       return Promise.reject();
     }
+
     req.user = user;
     req.token = token;
     next();
   }).catch((e) => {
-    res.status(401).send(e);
+    res.status(401).send();
   });
 }
 
-module.exports = { authenticate }
+module.exports = { authenticate };
