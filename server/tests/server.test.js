@@ -292,3 +292,26 @@ describe('POST /users/login', () => {
       .end(done)
   });
 })
+
+
+describe('DELETE /users/me/token', () => {
+  it('should auth token on log out', (done) => {
+    var user = users[0];
+    var token = users[0].tokens[0].token;
+
+    request(app)
+      .delete('/users/me/token')
+      .set('x-auth', token)
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+
+        User.findById(user._id).then((user) => {
+          expect(user.tokens.length).toBe(0);
+          done();
+        }).catch((e) => done(e));
+      });
+  });
+});
