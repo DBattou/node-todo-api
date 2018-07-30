@@ -16,15 +16,21 @@ const users = [{
 }, {
   _id: user2Id,
   email: 'qsdqsd@qsd.com',
-  password: 'MegaPassWordTwo'
+  password: 'MegaPassWordTwo',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({ _id: user2Id, access: 'auth' }, 'abc123').toString()
+  }]
 }];
 
 const todos = [{
   _id: new ObjectId(),
-  text: 'First test todo'
+  text: 'First test todo',
+  _creator: user1Id
 }, {
   _id: new ObjectId(),
   text: 'second test',
+  _creator: user2Id,
   completed: true,
   completedAt: 333
 }]
