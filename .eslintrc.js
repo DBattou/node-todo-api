@@ -1,3 +1,7 @@
 module.exports = {
-    "extends": "airbnb"
+    "extends": "airbnb",
+	rules: {
+		"no-underscore-dangle": ["off"],
+		"comma-dangle": ["off"]
+	}
 };
