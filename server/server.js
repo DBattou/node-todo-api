@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 
 const { mongooseStart } = require('./db/mongoose');
+const { BAD_REQUEST, NOT_FOUND, OK } = require('./ressources/http-status-codes');
 const { Todo } = require('./models/todo');
 const { User } = require('./models/user');
 const { authenticate } = require('./middleware/authenticate');
@@ -23,21 +24,21 @@ app.post('/todos', authenticate, (req, res) => {
   });
 
   todo.save().then((doc) => {
-    res.status(200).send(doc);
-  }).catch(e => res.status(400).send(e));
+    res.status(OK).send(doc);
+  }).catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 app.get('/todos', authenticate, (req, res) => {
   Todo.find({ _creator: req.user._id })
     .then(todos => res.send({ todos }))
-    .catch(e => res.status(400).send(e));
+    .catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 app.get('/todos/:id', authenticate, (req, res) => {
   const id = req.params.id;
 
   if (!ObjectId.isValid(id)) {
-    return res.status(404).send();
+    return res.status(NOT_FOUND).send();
   }
 
   Todo.findOne({
@@ -45,17 +46,17 @@ app.get('/todos/:id', authenticate, (req, res) => {
     _creator: req.user._id
   }).then((todo) => {
     if (!todo) {
-      return res.status(404).send();
+      return res.status(NOT_FOUND).send();
     }
-    return res.status(200).send({ todo });
-  }).catch(e => res.status(400).send(e));
+    return res.status(OK).send({ todo });
+  }).catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 
 app.delete('/todos/:id', authenticate, (req, res) => {
   const id = req.params.id;
   if (!ObjectId.isValid(id)) {
-    return res.status(404).send();
+    return res.status(NOT_FOUND).send();
   }
 
   Todo.findOneAndRemove({
@@ -63,10 +64,10 @@ app.delete('/todos/:id', authenticate, (req, res) => {
     _creator: req.user._id
   }).then((todo) => {
     if (!todo) {
-      return res.status(404).send();
+      return res.status(NOT_FOUND).send();
     }
-    res.status(200).send({ todo });
-  }).catch(e => res.status(400).send(e));
+    res.status(OK).send({ todo });
+  }).catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 app.patch('/todos/:id', authenticate, (req, res) => {
@@ -74,7 +75,7 @@ app.patch('/todos/:id', authenticate, (req, res) => {
   const body = _.pick(req.body, ['text', 'completed']);
 
   if (!ObjectId.isValid(id)) {
-    return res.status(404).send();
+    return res.status(NOT_FOUND).send();
   }
 
   if (_.isBoolean(body.completed) && body.completed) {
@@ -89,11 +90,11 @@ app.patch('/todos/:id', authenticate, (req, res) => {
     _creator: req.user._id
   }, { $set: body }, { new: true }).then((todo) => {
     if (!todo) {
-      return res.status(404).send();
+      return res.status(NOT_FOUND).send();
     }
 
     res.send({ todo });
-  }).catch(e => res.status(400).send(e));
+  }).catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 app.post('/users', (req, res) => {
@@ -102,7 +103,7 @@ app.post('/users', (req, res) => {
 
   user.generateAuthToken().then((token) => {
     res.header('x-auth', token).send(user);
-  }).catch(e => res.status(400).send(e));
+  }).catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 app.get('/users/me', authenticate, (req, res) => {
@@ -116,14 +117,14 @@ app.post('/users/login', (req, res) => {
     return user.generateAuthToken().then((token) => {
       res.header('x-auth', token).send(user);
     });
-  }).catch(e => res.status(400).send(e));
+  }).catch(e => res.status(BAD_REQUEST).send(e));
 });
 
 app.delete('/users/me/token', authenticate, (req, res) => {
   req.user.removeToken(req.token).then(() => {
-    res.status(200).send();
+    res.status(OK).send();
   }, () => {
-    res.status(400).send();
+    res.status(BAD_REQUEST).send();
   });
 });
 

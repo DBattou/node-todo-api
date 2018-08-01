@@ -4,9 +4,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node server/server.js",
-    "test": "export NODE_ENV=test && mocha server/**/*.test.js --exit && npm run-script lint",
+    "test": "export NODE_ENV=test && npm run-script lint && mocha server/**/*.test.js --exit",
     "test-watch": "nodemon --exec 'npm test'",
-    "lint": "./node_modules/.bin/eslint server/server.js"
+    "lint": "eslint server/server.js",
+    "future-lint": "eslint --ignore-path .gitignore .",
+    "lint-autofix": "./node_modules/.bin/eslint --fix --ignore-path .gitignore ."
   },
   "engines": {
     "node": "10.1.0"
